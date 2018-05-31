@@ -1,12 +1,24 @@
 #!/usr/bin/python
 
+
+"""
+add resulution to monitor
+$ cvt 1600 1200 60 
+# 1600x1200 59.87 Hz (CVT 1.92M3) hsync: 74.54 kHz; pclk: 161.00 MHz
+Modeline "1600x1200_60.00"  161.00  1600 1712 1880 2160  1200 1203 1207 1245 -hsync +vsync
+$ xrandr --newmode "1600x1200_60.00"  161.00  1600 1712 1880 2160  1200 1203 1207 1245 -hsync +vsync
+$ xrandr --addmode HDMI2 "1600x1200_60.00"
+$ xrandr --output HDMI2 --mode "1600x1200_60.00"
+"""
+
+
 import sys
 import os
 import subprocess
 
-LD = "LVDS-1-1" # Laptop Display
-D1 = "DP-1"     # Display 1
-D2 = "DP-2"     # Display 2
+LD = "LVDS1" # Laptop Display
+D1 = "HDMI2"     # Display 1
+D2 = "HDMI3"     # Display 2
 
 temp_file = "/tmp/dock.save"
 
@@ -14,12 +26,14 @@ def dock():
     os.system("xrandr --output " + LD + " --off")
     os.system("xrandr --output " + D1 + " --auto")
     os.system("xrandr --output " + D2 + " --auto --left-of " + D1 + " --primary")
+    os.system("xrandr --dpi 96")
     open(temp_file, "w").write("1")
 
 def undock():
     os.system("xrandr --output " + D1 + " --off")
     os.system("xrandr --output " + D2 + " --off")
     os.system("xrandr --output " + LD + " --auto --primary")
+    os.system("xrandr --dpi 96")
     open(temp_file, "w").write("0")
 
 def is_docked():
