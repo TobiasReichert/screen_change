@@ -1,26 +1,15 @@
 #!/usr/bin/python
 
-
-"""
-add resulution to monitor
-$ cvt 1600 1200 60 
-# 1600x1200 59.87 Hz (CVT 1.92M3) hsync: 74.54 kHz; pclk: 161.00 MHz
-Modeline "1600x1200_60.00"  161.00  1600 1712 1880 2160  1200 1203 1207 1245 -hsync +vsync
-$ xrandr --newmode "1600x1200_60.00"  161.00  1600 1712 1880 2160  1200 1203 1207 1245 -hsync +vsync
-$ xrandr --addmode HDMI2 "1600x1200_60.00"
-$ xrandr --output HDMI2 --mode "1600x1200_60.00"
-"""
-
-
 import sys
 import os
 import subprocess
 
-LD = "LVDS1" # Laptop Display
-D1 = "HDMI2"     # Display 1
-D2 = "HDMI3"     # Display 2
+LD = "LVDS1"    # Laptop Display
+D1 = "HDMI2"    # Display 1
+D2 = "HDMI3"    # Display 2
 
 temp_file = "/tmp/dock.save"
+
 
 def dock():
     os.system("xrandr --output " + LD + " --off")
@@ -29,12 +18,20 @@ def dock():
     os.system("xrandr --dpi 96")
     open(temp_file, "w").write("1")
 
+
 def undock():
     os.system("xrandr --output " + D1 + " --off")
     os.system("xrandr --output " + D2 + " --off")
     os.system("xrandr --output " + LD + " --auto --primary")
     os.system("xrandr --dpi 96")
     open(temp_file, "w").write("0")
+
+
+def init():
+    os.system('xrandr --newmode "1600x1200_60.00"  161.00  1600 1712 1880 2160  1200 1203 1207 1245 -hsync +vsync')
+    os.system('xrandr --addmode HDMI2 "1600x1200_60.00"')
+    os.system('xrandr --output HDMI2 --mode "1600x1200_60.00"')
+
 
 def is_docked():
     """
@@ -43,7 +40,12 @@ def is_docked():
     output = subprocess.check_output("xrandr")
     return not D2 + " disconnected" in output
 
+
 def decide():
+    # init if temp_file not exists
+    if not os.path.isfile(temp_file):
+        init()
+
     # if Display is disconnected undock
     if not is_docked():
         undock()
@@ -56,7 +58,7 @@ def decide():
         else:
             undock()
         return
-    # read the temp file 
+    # read the temp file
     value = open(temp_file, "r").read()
     if value == "1":
         undock()
@@ -64,6 +66,7 @@ def decide():
     else:
         dock()
         return
+
 
 def main():
     if len(sys.argv) == 1:
@@ -73,6 +76,8 @@ def main():
             dock()
         elif sys.argv[1] == "-u":
             undock()
+        elif sys.argv[1] == "-i":
+            init()
         else:
             print("ERROR: wrong arg")
 
